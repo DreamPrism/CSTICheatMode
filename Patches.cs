@@ -66,7 +66,7 @@ namespace CstiCheatMode
                     else
                     {
                         GUILayout.BeginHorizontal("box", Array.Empty<GUILayoutOption>());
-                        GUILayout.Label(string.Format("{0}({1})", __instance.AllCards[i].CardName, __instance.AllCards[i].name), Array.Empty<GUILayoutOption>());
+                        GUILayout.Label(string.Format("{0} ({1})", __instance.AllCards[i].CardName, __instance.AllCards[i].name), Array.Empty<GUILayoutOption>());
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Give", Array.Empty<GUILayoutOption>()))
                         {
