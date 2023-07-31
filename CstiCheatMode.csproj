@@ -10,7 +10,7 @@
     <RootNamespace>CstiCheatMode</RootNamespace>
     <AssemblyName>CstiCheatMode</AssemblyName>
     <Product>CSTI Cheat Mode Mod</Product>
-    <Version>0.0.1</Version>
+    <Version>0.0.2</Version>
     <Description>Enable and localize the cheat console for CSTI</Description>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
