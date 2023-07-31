@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using HarmonyLib;
+using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace CstiCheatMode
 {
     public static class Patches
     {
-        private static readonly ManualLogSource Log = Logger.CreateLogSource("Cheat Mode Patches");
+        private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
         public static bool PatchCheatsActive(ref bool __result)
@@ -150,6 +151,24 @@ namespace CstiCheatMode
                 __instance.CheatsMenuBGObject.SetActive(__instance.ShowGUI);
             }
             return false;
+        }
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(GameLoad), "CheckSteamAchievements")]
+        public static void PatchSteamAchievementsCheck(GameLoad __instance)
+        {
+            if (Plugin.HackAchievements && SteamManager.Initialized)
+            {
+                Plugin.HackAchievements = false;
+                PatchLogger.LogInfo("Hacking achievements...");
+                foreach (var name in Plugin.AchievementNames)
+                {
+                    PatchLogger.LogInfo($"Hacking {name}...");
+                    SteamUserStats.SetAchievement(name);
+                    PatchLogger.LogInfo($"Hacked {name}!");
+                }
+                SteamUserStats.StoreStats();
+                PatchLogger.LogInfo("All achievements done!");
+            }
         }
     }
 }
