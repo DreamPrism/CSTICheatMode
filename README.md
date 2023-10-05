@@ -2,6 +2,8 @@
 
 This mod enables the cheat console and hotkeys in the game.
 
+More "Give" buttons and "Give & unlock" button (for blueprints) are added to the console.
+
 An achievements hacker can be enabled in the config file.
 
 ## Installation
@@ -38,6 +40,3 @@ When you first use this mod, a default configuration file will be generated auto
 The mod modified the original cheat console in the game. So you can **search cards with their in-game names** now : )
 
 Setting the HackAchievements to true can unlock all the steam achievements on game startup.
-
-
-
