@@ -42,11 +42,11 @@ namespace CstiCheatMode
             {
                 return false;
             }
-            GUILayout.BeginVertical("box", Array.Empty<GUILayoutOption>());
-            GUILayout.Label("Cards", Array.Empty<GUILayoutOption>());
-            GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-            GUILayout.Label("Search", Array.Empty<GUILayoutOption>());
-            __instance.SearchedCardString = GUILayout.TextField(__instance.SearchedCardString, Array.Empty<GUILayoutOption>());
+            GUILayout.BeginVertical("box");
+            GUILayout.Label("Cards");
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Search");
+            __instance.SearchedCardString = GUILayout.TextField(__instance.SearchedCardString);
             GUILayout.EndHorizontal();
             __instance.CardsListScrollView = GUILayout.BeginScrollView(__instance.CardsListScrollView, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
             if (__instance.SearchedCardString == null)
@@ -66,26 +66,40 @@ namespace CstiCheatMode
                     }
                     else
                     {
-                        GUILayout.BeginHorizontal("box", Array.Empty<GUILayoutOption>());
-                        GUILayout.Label(string.Format("{0} ({1})", __instance.AllCards[i].CardName, __instance.AllCards[i].name), Array.Empty<GUILayoutOption>());
+                        GUILayout.BeginHorizontal("box");
+                        CardData card = __instance.AllCards[i];
+                        GUILayout.Label(string.Format("{0} ({1})", card.CardName, card.name));
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Give", Array.Empty<GUILayoutOption>()))
+                        if (GUILayout.Button("Give"))
                         {
-                            GameManager.GiveCard(__instance.AllCards[i], false);
+                            GameManager.GiveCard(card, false);
                         }
-                        if (__instance.AllCards[i].CardType != CardTypes.EnvImprovement)
+                        if (card.CardType != CardTypes.EnvImprovement)
                         {
-                            if (GUILayout.Button("Give 5", Array.Empty<GUILayoutOption>()))
-                            {
+                            if (GUILayout.Button("Give 5"))
                                 for (int j = 0; j < 5; j++)
+                                    GameManager.GiveCard(card, false);
+                            if (card.CardType == CardTypes.Blueprint)
+                            {
+                                if (GUILayout.Button("Give and unlock"))
                                 {
-                                    GameManager.GiveCard(__instance.AllCards[i], false);
+                                    GameManager.GiveCard(card, false);
+                                    __instance.GM.BlueprintModelStates[card] = BlueprintModelState.Available;
                                 }
                             }
+                            if (card.CardType == CardTypes.Item)
+                            {
+                                if (GUILayout.Button("Give 10"))
+                                    for (int j = 0; j < 10; j++)
+                                        GameManager.GiveCard(card, false);
+                                if (GUILayout.Button("Give 20"))
+                                    for (int j = 0; j < 20; j++)
+                                        GameManager.GiveCard(card, false);
+                            }
                         }
-                        else if (GUILayout.Button("Give and complete", Array.Empty<GUILayoutOption>()))
+                        else if (GUILayout.Button("Give and complete"))
                         {
-                            GameManager.GiveCard(__instance.AllCards[i], true);
+                            GameManager.GiveCard(card, true);
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -94,7 +108,7 @@ namespace CstiCheatMode
             GUILayout.EndScrollView();
             if (string.IsNullOrEmpty(__instance.SearchedCardString))
             {
-                GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+                GUILayout.BeginHorizontal();
                 if (__instance.CurrentPage == 0)
                 {
                     GUILayout.Box("<", new GUILayoutOption[] { GUILayout.Width(25f) });
@@ -104,7 +118,7 @@ namespace CstiCheatMode
                     __instance.CurrentPage--;
                 }
                 GUILayout.FlexibleSpace();
-                GUILayout.Label(string.Format("{0}/{1}", (__instance.CurrentPage + 1).ToString(), __instance.MaxPages.ToString()), Array.Empty<GUILayoutOption>());
+                GUILayout.Label(string.Format("{0}/{1}", (__instance.CurrentPage + 1).ToString(), __instance.MaxPages.ToString()));
                 GUILayout.FlexibleSpace();
                 if (__instance.CurrentPage == __instance.MaxPages - 1)
                 {
