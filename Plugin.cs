@@ -21,6 +21,7 @@ namespace CstiCheatMode
         public static KeyCode ForceLoseGameKey { get; private set; }
         public static KeyCode ShowFPSKey { get; private set; }
         public static bool HackAchievements { get; set; }
+        public static bool CombatInvincible { get; set; }
         private void Awake()
         {
             Enabled = Config.Bind("General", nameof(Enabled), true, "If true, enable cheat mode.").Value;

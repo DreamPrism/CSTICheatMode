@@ -13,6 +13,7 @@ namespace CstiCheatMode
 {
     public static class Patches
     {
+        private static readonly Stack<InGameCardBase[]> GiveOperations = new();
         private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
@@ -44,6 +45,20 @@ namespace CstiCheatMode
             }
             GUILayout.BeginVertical("box");
             GUILayout.Label("Cards");
+            if (GUILayout.Button($"Undo last operation{(GiveOperations.Count > 0 ? $": {GiveOperations.Peek()[0].CardModel.CardName}*{GiveOperations.Peek().Length}" : " (None)")}"))
+            {
+                if (GiveOperations.Count != 0)
+                {
+                    var lastOperation = GiveOperations.Pop();
+                    var cards = lastOperation;
+                    for (int i = 0; i < cards.Length; i++)
+                    {
+                        var card = cards[i];
+                        if (!card || !__instance.GM.AllCards.Contains(card)) continue;
+                        GameManager.PerformAction(card.CardModel.DefaultDiscardAction, card, true);
+                    }
+                }
+            }
             GUILayout.BeginHorizontal();
             GUILayout.Label("Search");
             __instance.SearchedCardString = GUILayout.TextField(__instance.SearchedCardString);
@@ -72,13 +87,12 @@ namespace CstiCheatMode
                         GUILayout.FlexibleSpace();
                         if (GUILayout.Button("Give"))
                         {
-                            GameManager.GiveCard(card, false);
+                            GiveCardsAndStack(card, false, 1);
                         }
                         if (card.CardType != CardTypes.EnvImprovement)
                         {
                             if (GUILayout.Button("Give 5"))
-                                for (int j = 0; j < 5; j++)
-                                    GameManager.GiveCard(card, false);
+                                GiveCardsAndStack(card, false, 5);
                             if (card.CardType == CardTypes.Blueprint)
                             {
                                 if (GUILayout.Button("Give and unlock"))
@@ -90,16 +104,14 @@ namespace CstiCheatMode
                             if (card.CardType == CardTypes.Item)
                             {
                                 if (GUILayout.Button("Give 10"))
-                                    for (int j = 0; j < 10; j++)
-                                        GameManager.GiveCard(card, false);
+                                    GiveCardsAndStack(card, false, 10);
                                 if (GUILayout.Button("Give 20"))
-                                    for (int j = 0; j < 20; j++)
-                                        GameManager.GiveCard(card, false);
+                                    GiveCardsAndStack(card, false, 20);
                             }
                         }
                         else if (GUILayout.Button("Give and complete"))
                         {
-                            GameManager.GiveCard(card, true);
+                            GiveCardsAndStack(card, true);
                         }
                         GUILayout.EndHorizontal();
                     }
@@ -130,6 +142,52 @@ namespace CstiCheatMode
                 }
                 GUILayout.EndHorizontal();
             }
+            GUILayout.EndVertical();
+            return false;
+        }
+
+        private static void GiveCardsAndStack(CardData card, bool complete, int amount = 1)
+        {
+            var cards = new InGameCardBase[amount];
+            for (int i = 0; i < amount; i++)
+            {
+                GameManager.GiveCard(card, complete);
+                var gameCard = MBSingleton<GameManager>.Instance.FindLatestCreatedCard(card);
+                cards[i] = gameCard;
+            }
+            GiveOperations.Push(cards);
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CheatsManager), "GeneralOptionsGUI")]
+        public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
+        {
+            GUILayout.BeginVertical("box");
+            CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent("FPS Counter"));
+            CheatsManager.CanDeleteAllCards = GUILayout.Toggle(CheatsManager.CanDeleteAllCards, new GUIContent("All cards can be trashed"));
+            Plugin.CombatInvincible = GUILayout.Toggle(Plugin.CombatInvincible, new GUIContent("Be invincible in all combats"));
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(string.Format("Suns ({0})", GameLoad.Instance.SaveData.Suns.ToString()));
+            if (GUILayout.Button("+10"))
+            {
+                GameLoad.Instance.SaveData.Suns += 10;
+            }
+            if (GUILayout.Button("+100"))
+            {
+                GameLoad.Instance.SaveData.Suns += 100;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(string.Format("Moons ({0})", GameLoad.Instance.SaveData.Moons.ToString()));
+            if (GUILayout.Button("+10"))
+            {
+                GameLoad.Instance.SaveData.Moons += 10;
+            }
+            if (GUILayout.Button("+100"))
+            {
+                GameLoad.Instance.SaveData.Moons += 100;
+            }
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
             return false;
         }
@@ -182,6 +240,34 @@ namespace CstiCheatMode
                 }
                 SteamUserStats.StoreStats();
                 PatchLogger.LogInfo("All achievements done!");
+            }
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EncounterPopup), "RollForClash")]
+        public static void PatchInvincibleCombatClash(EncounterPopup __instance)
+        {
+            var encounter = __instance.CurrentEncounter;
+            if (Plugin.CombatInvincible)
+                encounter.CurrentRoundClashResult = ClashResults.PlayerHits;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(EncounterPopup), "GenerateEnemyWound")]
+        public static void PatchInvincibleCombatDamage(EncounterPopup __instance)
+        {
+            if (Plugin.CombatInvincible)
+            {
+                var encounter = __instance.CurrentEncounter;
+                var action = encounter.CurrentPlayerAction;
+                if (action.DoesNotAttack || action.Damage.y <= 0f) return;
+                encounter.CurrentRoundEnemyWoundSeverity = WoundSeverity.Serious;
+                encounter.CurrentRoundEnemyWoundLocation = BodyLocations.Head;
+                var wound = encounter.EncounterModel.EnemyBodyTemplate.GetBodyLocation(BodyLocations.Head)
+                    .GetWoundsForSeverityDamageType(WoundSeverity.Serious, __instance.CurrentRoundPlayerDamageReport.DmgTypes)
+                    .OrderBy(w => w.EnemyValuesModifiers.BloodModifier.y).First();
+                encounter.CurrentRoundEnemyWound = wound;
+                __instance.CurrentRoundPlayerDamageReport.AttackSeverity = WoundSeverity.Serious;
             }
         }
     }
