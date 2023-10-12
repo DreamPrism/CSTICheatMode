@@ -40,3 +40,5 @@ When you first use this mod, a default configuration file will be generated auto
 The mod modified the original cheat console in the game. So you can **search cards with their in-game names** now : )
 
 Setting the HackAchievements to true can unlock all the steam achievements on game startup.
+
+For full change log & features, see Releases.
