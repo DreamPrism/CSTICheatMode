@@ -11,7 +11,7 @@ on:
 
 env:
   gameAssemblyPath: 'GameAssembly'
-  projectName: 'CSTICheatMode'
+  projectName: 'CstiCheatMode'
   outputPath: "bin\\Release"
   RESOURCE_URL: '${{ secrets.GAMEASSEMBLYDOWNLOADPATH }}'
   DOWNLOAD_PATH: '.\\res.zip'
