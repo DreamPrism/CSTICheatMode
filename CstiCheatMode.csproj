@@ -1,94 +1,81 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{34EF0BCE-B786-4A02-A804-061D17373005}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CstiCheatMode</RootNamespace>
-    <AssemblyName>CstiCheatMode</AssemblyName>
-    <Product>CSTI Cheat Mode Mod</Product>
-    <Version>0.0.2</Version>
-    <Description>Enable and localize the cheat console for CSTI</Description>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>latest</LangVersion>
-    <Authors>DreamPrism</Authors>
-    <GameAssemblyPath>..\..\Card Survival - Tropical Island_Data\Managed</GameAssemblyPath>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="BepInEx.Core" Version="5.4.17" />
-    <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
-    <PackageReference Include="UnityEngine.Modules" Version="2019.4.35" IncludeAssets="compile" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
-      <Publicize>true</Publicize>
-    </Reference>
-    <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>$(GameAssemblyPath)\Assembly-CSharp-firstpass.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(GameAssemblyPath)\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(GameAssemblyPath)\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AssetBundleModule">
-      <HintPath>$(GameAssemblyPath)\UnityEngine.AssetBundleModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GameAssemblyPath)\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>$(GameAssemblyPath)\UnityEngine.TextRenderingModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>$(GameAssemblyPath)\UnityEngine.UI.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Patches.cs" />
-    <Compile Include="Plugin.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="achievements.txt" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>CstiCheatMode</RootNamespace>
+		<AssemblyName>CstiCheatMode</AssemblyName>
+		<Product>CSTI Cheat Mode Mod</Product>
+		<Version>0.0.2</Version>
+		<Description>Enable and localize the cheat console for CSTI</Description>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<TargetFramework>net48</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<Authors>DreamPrism</Authors>
+		<GameAssemblyPath>..\..\Card Survival - Tropical Island_Data\Managed</GameAssemblyPath>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+		<WarningLevel>4</WarningLevel>
+		<ErrorReport>prompt</ErrorReport>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<OutputPath>bin\Release\</OutputPath>
+		<DefineConstants>TRACE</DefineConstants>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="BepInEx.Core" Version="5.4.17" />
+		<PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+		<PackageReference Include="UnityEngine.Modules" Version="2019.4.35" IncludeAssets="compile" />
+	</ItemGroup>
+	<ItemGroup>
+		<Reference Include="System" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="System.Data.DataSetExtensions" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Net.Http" />
+		<Reference Include="System.Xml" />
+		<Reference Include="Assembly-CSharp">
+			<HintPath>$(GameAssemblyPath)\Assembly-CSharp.dll</HintPath>
+			<Publicize>true</Publicize>
+		</Reference>
+		<Reference Include="Assembly-CSharp-firstpass">
+			<HintPath>$(GameAssemblyPath)\Assembly-CSharp-firstpass.dll</HintPath>
+		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+			<HintPath>$(GameAssemblyPath)\Unity.TextMeshPro.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>$(GameAssemblyPath)\UnityEngine.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.AssetBundleModule">
+			<HintPath>$(GameAssemblyPath)\UnityEngine.AssetBundleModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(GameAssemblyPath)\UnityEngine.CoreModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>$(GameAssemblyPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+		</Reference>
+		<Reference Include="UnityEngine.UI">
+			<HintPath>$(GameAssemblyPath)\UnityEngine.UI.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="achievements.txt" />
+	</ItemGroup>
 </Project>
