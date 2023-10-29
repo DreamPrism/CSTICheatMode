@@ -37,7 +37,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore -s https://api.nuget.org/v3/index.json -s https://nuget.bepinex.dev/v3/index.json
     - name: Download Game Assembly
       run: |
         $progressPreference = 'SilentlyContinue'
