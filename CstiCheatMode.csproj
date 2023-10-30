@@ -5,10 +5,10 @@
 		<RootNamespace>CstiCheatMode</RootNamespace>
 		<AssemblyName>CstiCheatMode</AssemblyName>
 		<Product>CSTI Cheat Mode Mod</Product>
-		<Version>0.0.2</Version>
+		<Version>0.0.4</Version>
 		<Description>Enable and localize the cheat console for CSTI</Description>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<TargetFramework>net48</TargetFramework>
+		<TargetFramework>net472</TargetFramework>
 		<LangVersion>latest</LangVersion>
 		<Authors>DreamPrism</Authors>
 		<GameAssemblyPath>..\..\Card Survival - Tropical Island_Data\Managed</GameAssemblyPath>
