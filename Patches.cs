@@ -15,6 +15,21 @@ namespace CstiCheatMode
     {
         private static readonly Stack<InGameCardBase[]> GiveOperations = new();
         private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
+
+        private static void ClearEmptyCardOperation()
+        {
+            if (GiveOperations.Count > 0)
+            {
+                var peek = GiveOperations.Peek();
+                while (peek.Length == 0 || peek[0].CardModel == null)
+                {
+                    GiveOperations.Pop();
+                    if (GiveOperations.Count == 0) break;
+                    peek = GiveOperations.Peek();
+                }
+            }
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
         public static bool PatchCheatsActive(ref bool __result)
@@ -45,6 +60,7 @@ namespace CstiCheatMode
             }
             GUILayout.BeginVertical("box");
             GUILayout.Label("Cards");
+            ClearEmptyCardOperation();
             if (GUILayout.Button($"Undo last operation{(GiveOperations.Count > 0 ? $": {GiveOperations.Peek()[0].CardModel.CardName}*{GiveOperations.Peek().Length}" : " (None)")}"))
             {
                 if (GiveOperations.Count != 0)
