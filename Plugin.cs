@@ -40,6 +40,7 @@ namespace CstiCheatMode
                 Logger.LogInfo($"Load steam achievement names successfully!");
             }
 
+            Harmony.CreateAndPatchAll(typeof(Localization));
             Harmony.CreateAndPatchAll(typeof(Patches));
 
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

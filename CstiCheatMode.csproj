@@ -5,7 +5,7 @@
 		<RootNamespace>CstiCheatMode</RootNamespace>
 		<AssemblyName>CstiCheatMode</AssemblyName>
 		<Product>CSTI Cheat Mode Mod</Product>
-		<Version>0.0.5</Version>
+		<Version>0.0.6</Version>
 		<Description>Enable and localize the cheat console for CSTI</Description>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<TargetFramework>net472</TargetFramework>
@@ -30,6 +30,9 @@
 		<OutputPath>bin\Release\</OutputPath>
 		<DefineConstants>TRACE</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="locale\简体中文.csv" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
 		<PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
@@ -77,5 +80,8 @@
 	</ItemGroup>
 	<ItemGroup>
 		<EmbeddedResource Include="achievements.txt" />
+	</ItemGroup>
+	<ItemGroup>
+	  <EmbeddedResource Include="locale\简体中文.csv" />
 	</ItemGroup>
 </Project>

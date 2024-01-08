@@ -59,9 +59,13 @@ namespace CstiCheatMode
                 return false;
             }
             GUILayout.BeginVertical("box");
-            GUILayout.Label("Cards");
+            GUILayout.Label(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Cards",
+                DefaultText = "Cards"
+            });
             ClearEmptyCardOperation();
-            if (GUILayout.Button($"Undo last operation{(GiveOperations.Count > 0 ? $": {GiveOperations.Peek()[0].CardModel.CardName}*{GiveOperations.Peek().Length}" : " (None)")}"))
+            if (GUILayout.Button($"{new LocalizedString { LocalizationKey = "CstiCheatMode.Undo", DefaultText = "Undo last operation" }}{(GiveOperations.Count > 0 ? $": {GiveOperations.Peek()[0].CardModel.CardName}*{GiveOperations.Peek().Length}" : " (None)")}"))
             {
                 if (GiveOperations.Count != 0)
                 {
@@ -76,7 +80,11 @@ namespace CstiCheatMode
                 }
             }
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Search");
+            GUILayout.Label(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Search",
+                DefaultText = "Search"
+            });
             __instance.SearchedCardString = GUILayout.TextField(__instance.SearchedCardString);
             GUILayout.EndHorizontal();
             __instance.CardsListScrollView = GUILayout.BeginScrollView(__instance.CardsListScrollView, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
@@ -101,31 +109,57 @@ namespace CstiCheatMode
                         CardData card = __instance.AllCards[i];
                         GUILayout.Label(string.Format("{0} ({1})", card.CardName, card.name));
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Give"))
+                        if (GUILayout.Button(new LocalizedString
+                        {
+                            LocalizationKey = "CstiCheatMode.Give",
+                            DefaultText = "Give"
+                        }))
                         {
                             GiveCardsAndStack(card, false, 1);
                         }
                         if (card.CardType != CardTypes.EnvImprovement)
                         {
-                            if (GUILayout.Button("Give 5"))
+                            if (GUILayout.Button(new LocalizedString
+                            {
+                                LocalizationKey = "CstiCheatMode.Give5",
+                                DefaultText = "Give 5"
+                            }))
                                 GiveCardsAndStack(card, false, 5);
                             if (card.CardType == CardTypes.Blueprint)
                             {
-                                if (GUILayout.Button("Give and unlock"))
+                                if (GUILayout.Button(new LocalizedString
+                                {
+                                    LocalizationKey = "CstiCheatMode.Unlock",
+                                    DefaultText = "Unlock"
+                                }))
                                 {
                                     GameManager.GiveCard(card, false);
                                     __instance.GM.BlueprintModelStates[card] = BlueprintModelState.Available;
+                                    if (__instance.GM.PurchasableBlueprintCards.Contains(card))
+                                        __instance.GM.PurchasableBlueprintCards.Remove(card);
                                 }
                             }
                             if (card.CardType == CardTypes.Item)
                             {
-                                if (GUILayout.Button("Give 10"))
+                                if (GUILayout.Button(new LocalizedString
+                                {
+                                    LocalizationKey = "CstiCheatMode.Give10",
+                                    DefaultText = "Give 10"
+                                }))
                                     GiveCardsAndStack(card, false, 10);
-                                if (GUILayout.Button("Give 20"))
+                                if (GUILayout.Button(new LocalizedString
+                                {
+                                    LocalizationKey = "CstiCheatMode.Give20",
+                                    DefaultText = "Give 20"
+                                }))
                                     GiveCardsAndStack(card, false, 20);
                             }
                         }
-                        else if (GUILayout.Button("Give and complete"))
+                        else if (GUILayout.Button(new LocalizedString
+                        {
+                            LocalizationKey = "CstiCheatMode.Complete",
+                            DefaultText = "Give and complete"
+                        }))
                         {
                             GiveCardsAndStack(card, true);
                         }
@@ -179,11 +213,27 @@ namespace CstiCheatMode
         public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
         {
             GUILayout.BeginVertical("box");
-            CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent("FPS Counter"));
-            CheatsManager.CanDeleteAllCards = GUILayout.Toggle(CheatsManager.CanDeleteAllCards, new GUIContent("All cards can be trashed"));
-            Plugin.CombatInvincible = GUILayout.Toggle(Plugin.CombatInvincible, new GUIContent("Be invincible in all combats"));
+            CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.FPSCounter",
+                DefaultText = "FPS Counter"
+            }));
+            CheatsManager.CanDeleteAllCards = GUILayout.Toggle(CheatsManager.CanDeleteAllCards, new GUIContent(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.TrashAll",
+                DefaultText = "All cards can be trashed"
+            }));
+            Plugin.CombatInvincible = GUILayout.Toggle(Plugin.CombatInvincible, new GUIContent(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.EncounterInvincible",
+                DefaultText = "Be invincible in all encounters"
+            }));
             GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("Suns ({0})", GameLoad.Instance.SaveData.Suns.ToString()));
+            GUILayout.Label(string.Format("{0} ({1})", new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Suns",
+                DefaultText = "Suns"
+            }, GameLoad.Instance.SaveData.Suns.ToString()));
             if (GUILayout.Button("+10"))
             {
                 GameLoad.Instance.SaveData.Suns += 10;
@@ -194,7 +244,11 @@ namespace CstiCheatMode
             }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("Moons ({0})", GameLoad.Instance.SaveData.Moons.ToString()));
+            GUILayout.Label(string.Format("{0} ({1})", new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Moons",
+                DefaultText = "Moons"
+            }, GameLoad.Instance.SaveData.Moons.ToString()));
             if (GUILayout.Button("+10"))
             {
                 GameLoad.Instance.SaveData.Moons += 10;
@@ -207,6 +261,76 @@ namespace CstiCheatMode
             GUILayout.EndVertical();
             return false;
         }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(CheatsManager), "TimeGUI")]
+        public static bool TimeGUI(CheatsManager __instance)
+        {
+            if (!__instance.GM)
+            {
+                return false;
+            }
+            GUILayout.BeginVertical("box");
+            GUILayout.Label(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.SetTimeTitle",
+                DefaultText = "Set time to:"
+            });
+            GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+            GUILayout.Label(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Days",
+                DefaultText = "Days:"
+            });
+            GUILayout.FlexibleSpace();
+            if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            {
+                __instance.SetTimeDay--;
+            }
+            GUILayout.Label(__instance.SetTimeDay.ToString(), new GUILayoutOption[] { GUILayout.Width(37.5f) });
+            if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            {
+                __instance.SetTimeDay++;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+            GUILayout.Label(string.Format("{0} ({1}):", new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.Ticks",
+                DefaultText = "Tick"
+            }, GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick((float)__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)));
+            GUILayout.FlexibleSpace();
+            if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            {
+                __instance.SetTimeTick--;
+            }
+            GUILayout.Label(__instance.SetTimeTick.ToString(), new GUILayoutOption[] { GUILayout.Width(37.5f) });
+            if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            {
+                __instance.SetTimeTick++;
+            }
+            GUILayout.EndHorizontal();
+            if (__instance.GM)
+            {
+                __instance.SetTimeTick = Mathf.Clamp(__instance.SetTimeTick, 0, __instance.GM.DaySettings.DailyPoints);
+                __instance.SetTimeDay = Mathf.Max(0, __instance.SetTimeDay);
+            }
+            else
+            {
+                GUILayout.Label("No GameManager found");
+            }
+            if (GUILayout.Button(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.SetTime",
+                DefaultText = "Set time!"
+            }) && __instance.GM)
+            {
+                __instance.GM.SetTimeTo(__instance.SetTimeDay, __instance.SetTimeTick);
+            }
+            GUILayout.EndVertical();
+            return false;
+        }
+
         [HarmonyPrefix]
         [HarmonyPatch(typeof(CheatsManager), "Update")]
         public static bool PatchCheatsUpdate(CheatsManager __instance)
@@ -258,6 +382,7 @@ namespace CstiCheatMode
                 PatchLogger.LogInfo("All achievements done!");
             }
         }
+
 
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EncounterPopup), "RollForClash")]
