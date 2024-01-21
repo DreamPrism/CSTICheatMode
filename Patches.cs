@@ -4,44 +4,40 @@ using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Logger = BepInEx.Logging.Logger;
 
-namespace CstiCheatMode
+namespace CstiCheatMode;
+
+public static class Patches
 {
-    public static class Patches
+    private static readonly Stack<InGameCardBase[]> GiveOperations = new();
+    private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
+
+    private static void ClearEmptyCardOperation()
     {
-        private static readonly Stack<InGameCardBase[]> GiveOperations = new();
-        private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
-
-        private static void ClearEmptyCardOperation()
+        if (GiveOperations.Count <= 0) return;
+        var peek = GiveOperations.Peek();
+        while (peek.Length == 0 || peek[0].CardModel == null)
         {
-            if (GiveOperations.Count > 0)
-            {
-                var peek = GiveOperations.Peek();
-                while (peek.Length == 0 || peek[0].CardModel == null)
-                {
-                    GiveOperations.Pop();
-                    if (GiveOperations.Count == 0) break;
-                    peek = GiveOperations.Peek();
-                }
-            }
+            GiveOperations.Pop();
+            if (GiveOperations.Count == 0) break;
+            peek = GiveOperations.Peek();
         }
+    }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
-        public static bool PatchCheatsActive(ref bool __result)
-        {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
+    public static bool PatchCheatsActive(ref bool __result)
+    {
             __result = Plugin.Enabled;
             return false;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CheatsManager), "CardsGUI")]
-        public static bool PatchCardsGUI(CheatsManager __instance)
-        {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CheatsManager), "CardsGUI")]
+    public static bool PatchCardsGUI(CheatsManager __instance)
+    {
             if (!__instance.GM)
             {
                 return false;
@@ -115,7 +111,7 @@ namespace CstiCheatMode
                             DefaultText = "Give"
                         }))
                         {
-                            GiveCardsAndStack(card, false, 1);
+                            GiveCardsAndStack(card, false);
                         }
                         if (card.CardType != CardTypes.EnvImprovement)
                         {
@@ -196,8 +192,8 @@ namespace CstiCheatMode
             return false;
         }
 
-        private static void GiveCardsAndStack(CardData card, bool complete, int amount = 1)
-        {
+    private static void GiveCardsAndStack(CardData card, bool complete, int amount = 1)
+    {
             var cards = new InGameCardBase[amount];
             for (int i = 0; i < amount; i++)
             {
@@ -208,10 +204,10 @@ namespace CstiCheatMode
             GiveOperations.Push(cards);
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CheatsManager), "GeneralOptionsGUI")]
-        public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
-        {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CheatsManager), "GeneralOptionsGUI")]
+    public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
+    {
             GUILayout.BeginVertical("box");
             CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent(new LocalizedString
             {
@@ -262,10 +258,10 @@ namespace CstiCheatMode
             return false;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CheatsManager), "TimeGUI")]
-        public static bool TimeGUI(CheatsManager __instance)
-        {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CheatsManager), "TimeGUI")]
+    public static bool TimeGUI(CheatsManager __instance)
+    {
             if (!__instance.GM)
             {
                 return false;
@@ -283,12 +279,12 @@ namespace CstiCheatMode
                 DefaultText = "Days:"
             });
             GUILayout.FlexibleSpace();
-            if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
             {
                 __instance.SetTimeDay--;
             }
-            GUILayout.Label(__instance.SetTimeDay.ToString(), new GUILayoutOption[] { GUILayout.Width(37.5f) });
-            if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            GUILayout.Label(__instance.SetTimeDay.ToString(), GUILayout.Width(37.5f));
+            if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
             {
                 __instance.SetTimeDay++;
             }
@@ -298,14 +294,14 @@ namespace CstiCheatMode
             {
                 LocalizationKey = "CstiCheatMode.Ticks",
                 DefaultText = "Tick"
-            }, GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick((float)__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)));
+            }, GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)));
             GUILayout.FlexibleSpace();
-            if (GUILayout.RepeatButton("-", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
             {
                 __instance.SetTimeTick--;
             }
-            GUILayout.Label(__instance.SetTimeTick.ToString(), new GUILayoutOption[] { GUILayout.Width(37.5f) });
-            if (GUILayout.RepeatButton("+", new GUILayoutOption[] { GUILayout.Width(25f) }) && Time.frameCount % 4 == 0)
+            GUILayout.Label(__instance.SetTimeTick.ToString(), GUILayout.Width(37.5f));
+            if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
             {
                 __instance.SetTimeTick++;
             }
@@ -331,10 +327,10 @@ namespace CstiCheatMode
             return false;
         }
 
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(CheatsManager), "Update")]
-        public static bool PatchCheatsUpdate(CheatsManager __instance)
-        {
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(CheatsManager), "Update")]
+    public static bool PatchCheatsUpdate(CheatsManager __instance)
+    {
             if (Plugin.Enabled)
             {
                 if (!__instance.GM)
@@ -364,10 +360,10 @@ namespace CstiCheatMode
             }
             return false;
         }
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameLoad), "CheckSteamAchievements")]
-        public static void PatchSteamAchievementsCheck(GameLoad __instance)
-        {
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(GameLoad), "CheckSteamAchievements")]
+    public static void PatchSteamAchievementsCheck(GameLoad __instance)
+    {
             if (Plugin.HackAchievements && SteamManager.Initialized)
             {
                 Plugin.HackAchievements = false;
@@ -381,35 +377,34 @@ namespace CstiCheatMode
                 SteamUserStats.StoreStats();
                 PatchLogger.LogInfo("All achievements done!");
             }
-        }
+    }
 
 
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(EncounterPopup), "RollForClash")]
-        public static void PatchInvincibleCombatClash(EncounterPopup __instance)
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(EncounterPopup), "RollForClash")]
+    public static void PatchInvincibleCombatClash(EncounterPopup __instance)
+    {
+        var encounter = __instance.CurrentEncounter;
+        if (Plugin.CombatInvincible)
+            encounter.CurrentRoundClashResult = ClashResults.PlayerHits;
+    }
+
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(EncounterPopup), "GenerateEnemyWound")]
+    public static void PatchInvincibleCombatDamage(EncounterPopup __instance)
+    {
+        if (Plugin.CombatInvincible)
         {
             var encounter = __instance.CurrentEncounter;
-            if (Plugin.CombatInvincible)
-                encounter.CurrentRoundClashResult = ClashResults.PlayerHits;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(EncounterPopup), "GenerateEnemyWound")]
-        public static void PatchInvincibleCombatDamage(EncounterPopup __instance)
-        {
-            if (Plugin.CombatInvincible)
-            {
-                var encounter = __instance.CurrentEncounter;
-                var action = encounter.CurrentPlayerAction;
-                if (action.DoesNotAttack || action.Damage.y <= 0f) return;
-                encounter.CurrentRoundEnemyWoundSeverity = WoundSeverity.Serious;
-                encounter.CurrentRoundEnemyWoundLocation = BodyLocations.Head;
-                var wound = encounter.EncounterModel.EnemyBodyTemplate.GetBodyLocation(BodyLocations.Head)
-                    .GetWoundsForSeverityDamageType(WoundSeverity.Serious, __instance.CurrentRoundPlayerDamageReport.DmgTypes)
-                    .OrderBy(w => w.EnemyValuesModifiers.BloodModifier.y).First();
-                encounter.CurrentRoundEnemyWound = wound;
-                __instance.CurrentRoundPlayerDamageReport.AttackSeverity = WoundSeverity.Serious;
-            }
+            var action = encounter.CurrentPlayerAction;
+            if (action.DoesNotAttack || action.Damage.y <= 0f) return;
+            encounter.CurrentRoundEnemyWoundSeverity = WoundSeverity.Serious;
+            encounter.CurrentRoundEnemyWoundLocation = BodyLocations.Head;
+            var wound = encounter.EncounterModel.EnemyBodyTemplate.GetBodyLocation(BodyLocations.Head)
+                .GetWoundsForSeverityDamageType(WoundSeverity.Serious, __instance.CurrentRoundPlayerDamageReport.DmgTypes)
+                .OrderBy(w => w.EnemyValuesModifiers.BloodModifier.y).First();
+            encounter.CurrentRoundEnemyWound = wound;
+            __instance.CurrentRoundPlayerDamageReport.AttackSeverity = WoundSeverity.Serious;
         }
     }
 }
