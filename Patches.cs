@@ -32,7 +32,7 @@ public static class Patches
     {
             __result = Plugin.Enabled;
             return false;
-        }
+    }
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CheatsManager), "CardsGUI")]
@@ -66,10 +66,8 @@ public static class Patches
                 if (GiveOperations.Count != 0)
                 {
                     var lastOperation = GiveOperations.Pop();
-                    var cards = lastOperation;
-                    for (int i = 0; i < cards.Length; i++)
+                    foreach (var card in lastOperation)
                     {
-                        var card = cards[i];
                         if (!card || !__instance.GM.AllCards.Contains(card)) continue;
                         GameManager.PerformAction(card.CardModel.DefaultDiscardAction, card, true);
                     }
@@ -84,83 +82,80 @@ public static class Patches
             __instance.SearchedCardString = GUILayout.TextField(__instance.SearchedCardString);
             GUILayout.EndHorizontal();
             __instance.CardsListScrollView = GUILayout.BeginScrollView(__instance.CardsListScrollView, new GUILayoutOption[] { GUILayout.ExpandHeight(true) });
-            if (__instance.SearchedCardString == null)
+            __instance.SearchedCardString ??= "";
+            for (var i = 0; i < __instance.AllCards.Length; i++)
             {
-                __instance.SearchedCardString = "";
-            }
-            for (int i = 0; i < __instance.AllCards.Length; i++)
-            {
-                if (__instance.AllCards[i].name.ToLower().Contains(__instance.SearchedCardString.ToLower()) || __instance.AllCards[i].CardName.ToString().ToLower().Contains(__instance.SearchedCardString.ToLower()))
+                if (!__instance.AllCards[i].name.ToLower().Contains(__instance.SearchedCardString.ToLower()) &&
+                    !__instance.AllCards[i].CardName.ToString().ToLower()
+                        .Contains(__instance.SearchedCardString.ToLower())) continue;
+                if (i / 150 != __instance.CurrentPage && string.IsNullOrEmpty(__instance.SearchedCardString))
                 {
-                    if (i / 150 != __instance.CurrentPage && string.IsNullOrEmpty(__instance.SearchedCardString))
+                    if (i >= 150 * __instance.CurrentPage)
                     {
-                        if (i >= 150 * __instance.CurrentPage)
-                        {
-                            break;
-                        }
+                        break;
                     }
-                    else
-                    {
-                        GUILayout.BeginHorizontal("box");
-                        CardData card = __instance.AllCards[i];
-                        GUILayout.Label(string.Format("{0} ({1})", card.CardName, card.name));
-                        GUILayout.FlexibleSpace();
-                        if (GUILayout.Button(new LocalizedString
+                }
+                else
+                {
+                    GUILayout.BeginHorizontal("box");
+                    var card = __instance.AllCards[i];
+                    GUILayout.Label($"{card.CardName} ({card.name})");
+                    GUILayout.FlexibleSpace();
+                    if (GUILayout.Button(new LocalizedString
                         {
                             LocalizationKey = "CstiCheatMode.Give",
                             DefaultText = "Give"
                         }))
-                        {
-                            GiveCardsAndStack(card, false);
-                        }
-                        if (card.CardType != CardTypes.EnvImprovement)
-                        {
-                            if (GUILayout.Button(new LocalizedString
+                    {
+                        GiveCardsAndStack(card, false);
+                    }
+                    if (card.CardType != CardTypes.EnvImprovement)
+                    {
+                        if (GUILayout.Button(new LocalizedString
                             {
                                 LocalizationKey = "CstiCheatMode.Give5",
                                 DefaultText = "Give 5"
                             }))
-                                GiveCardsAndStack(card, false, 5);
-                            if (card.CardType == CardTypes.Blueprint)
-                            {
-                                if (GUILayout.Button(new LocalizedString
+                            GiveCardsAndStack(card, false, 5);
+                        if (card.CardType == CardTypes.Blueprint)
+                        {
+                            if (GUILayout.Button(new LocalizedString
                                 {
                                     LocalizationKey = "CstiCheatMode.Unlock",
                                     DefaultText = "Unlock"
                                 }))
-                                {
-                                    GameManager.GiveCard(card, false);
-                                    __instance.GM.BlueprintModelStates[card] = BlueprintModelState.Available;
-                                    if (__instance.GM.PurchasableBlueprintCards.Contains(card))
-                                        __instance.GM.PurchasableBlueprintCards.Remove(card);
-                                }
-                            }
-                            if (card.CardType == CardTypes.Item)
                             {
-                                if (GUILayout.Button(new LocalizedString
+                                GameManager.GiveCard(card, false);
+                                __instance.GM.BlueprintModelStates[card] = BlueprintModelState.Available;
+                                if (__instance.GM.PurchasableBlueprintCards.Contains(card))
+                                    __instance.GM.PurchasableBlueprintCards.Remove(card);
+                            }
+                        }
+                        if (card.CardType == CardTypes.Item)
+                        {
+                            if (GUILayout.Button(new LocalizedString
                                 {
                                     LocalizationKey = "CstiCheatMode.Give10",
                                     DefaultText = "Give 10"
                                 }))
-                                    GiveCardsAndStack(card, false, 10);
-                                if (GUILayout.Button(new LocalizedString
+                                GiveCardsAndStack(card, false, 10);
+                            if (GUILayout.Button(new LocalizedString
                                 {
                                     LocalizationKey = "CstiCheatMode.Give20",
                                     DefaultText = "Give 20"
                                 }))
-                                    GiveCardsAndStack(card, false, 20);
-                            }
+                                GiveCardsAndStack(card, false, 20);
                         }
-                        else if (GUILayout.Button(new LocalizedString
-                        {
-                            LocalizationKey = "CstiCheatMode.Complete",
-                            DefaultText = "Give and complete"
-                        }))
-                        {
-                            GiveCardsAndStack(card, true);
-                        }
-                        GUILayout.EndHorizontal();
                     }
+                    else if (GUILayout.Button(new LocalizedString
+                             {
+                                 LocalizationKey = "CstiCheatMode.Complete",
+                                 DefaultText = "Give and complete"
+                             }))
+                    {
+                        GiveCardsAndStack(card, true);
+                    }
+                    GUILayout.EndHorizontal();
                 }
             }
             GUILayout.EndScrollView();
@@ -219,17 +214,22 @@ public static class Patches
                 LocalizationKey = "CstiCheatMode.TrashAll",
                 DefaultText = "All cards can be trashed"
             }));
+            Plugin.FastExploration = GUILayout.Toggle(Plugin.FastExploration, new GUIContent(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.FastExploration",
+                DefaultText = "Fast exploration"
+            }));
             Plugin.CombatInvincible = GUILayout.Toggle(Plugin.CombatInvincible, new GUIContent(new LocalizedString
             {
                 LocalizationKey = "CstiCheatMode.EncounterInvincible",
                 DefaultText = "Be invincible in all encounters"
             }));
             GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("{0} ({1})", new LocalizedString
+            GUILayout.Label($"{new LocalizedString
             {
                 LocalizationKey = "CstiCheatMode.Suns",
                 DefaultText = "Suns"
-            }, GameLoad.Instance.SaveData.Suns.ToString()));
+            }} ({GameLoad.Instance.SaveData.Suns.ToString()})");
             if (GUILayout.Button("+10"))
             {
                 GameLoad.Instance.SaveData.Suns += 10;
@@ -240,11 +240,11 @@ public static class Patches
             }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            GUILayout.Label(string.Format("{0} ({1})", new LocalizedString
+            GUILayout.Label($"{new LocalizedString
             {
                 LocalizationKey = "CstiCheatMode.Moons",
                 DefaultText = "Moons"
-            }, GameLoad.Instance.SaveData.Moons.ToString()));
+            }} ({GameLoad.Instance.SaveData.Moons.ToString()})");
             if (GUILayout.Button("+10"))
             {
                 GameLoad.Instance.SaveData.Moons += 10;
@@ -290,11 +290,11 @@ public static class Patches
             }
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
-            GUILayout.Label(string.Format("{0} ({1}):", new LocalizedString
+            GUILayout.Label($"{new LocalizedString
             {
                 LocalizationKey = "CstiCheatMode.Ticks",
                 DefaultText = "Tick"
-            }, GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)));
+            }} ({GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)}):");
             GUILayout.FlexibleSpace();
             if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
             {
@@ -331,35 +331,43 @@ public static class Patches
     [HarmonyPatch(typeof(CheatsManager), "Update")]
     public static bool PatchCheatsUpdate(CheatsManager __instance)
     {
-            if (Plugin.Enabled)
-            {
-                if (!__instance.GM)
-                {
-                    __instance.GM = MBSingleton<GameManager>.Instance;
-                }
-                if (Input.GetKeyDown(Plugin.ShowFPSKey))
-                {
-                    CheatsManager.ShowFPS = !CheatsManager.ShowFPS;
-                }
-                if (__instance.GM)
-                {
-                    if (Input.GetKeyDown(Plugin.ForceLoseGameKey))
-                    {
-                        MBSingleton<GameManager>.Instance.OpenEndgameJournal(true);
-                    }
-                    else if (Input.GetKeyDown(Plugin.ForceWinGameKey))
-                    {
-                        MBSingleton<GameManager>.Instance.OpenEndgameJournal(false);
-                    }
-                }
-                if (Input.GetKeyDown(Plugin.CallConsoleKey))
-                {
-                    __instance.ShowGUI = !__instance.ShowGUI;
-                }
-                __instance.CheatsMenuBGObject.SetActive(__instance.ShowGUI);
-            }
-            return false;
+        if (!Plugin.Enabled) return false;
+        if (!__instance.GM)
+        {
+            __instance.GM = MBSingleton<GameManager>.Instance;
         }
+        if (Input.GetKeyDown(Plugin.ShowFPSKey))
+        {
+            CheatsManager.ShowFPS = !CheatsManager.ShowFPS;
+        }
+        if (__instance.GM)
+        {
+            if (Input.GetKeyDown(Plugin.ForceLoseGameKey))
+            {
+                MBSingleton<GameManager>.Instance.OpenEndgameJournal(true);
+            }
+            else if (Input.GetKeyDown(Plugin.ForceWinGameKey))
+            {
+                MBSingleton<GameManager>.Instance.OpenEndgameJournal(false);
+            }
+        }
+        if (Input.GetKeyDown(Plugin.CallConsoleKey))
+        {
+            __instance.ShowGUI = !__instance.ShowGUI;
+        }
+        __instance.CheatsMenuBGObject.SetActive(__instance.ShowGUI);
+        return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ExplorationBar),"ShouldUnlockExplorationResults")]
+    public static bool Patch(ExplorationBar __instance,ref bool __result)
+    {
+        if (!Plugin.FastExploration) return true;
+        __result = true;
+        return false;
+    }
+    
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameLoad), "CheckSteamAchievements")]
     public static void PatchSteamAchievementsCheck(GameLoad __instance)

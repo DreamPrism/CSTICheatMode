@@ -18,6 +18,7 @@ public class Plugin : BaseUnityPlugin
     public static KeyCode ShowFPSKey { get; private set; }
     public static bool HackAchievements { get; set; }
     public static bool CombatInvincible { get; set; }
+    public static bool FastExploration { get;set; }
     private void Awake()
     {
         Enabled = Config.Bind("General", nameof(Enabled), true, "If true, enable cheat mode.").Value;

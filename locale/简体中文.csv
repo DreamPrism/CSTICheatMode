@@ -9,6 +9,7 @@ CstiCheatMode.Unlock,Unlock,解锁
 CstiCheatMode.Complete,Give and complete,获取并完成
 CstiCheatMode.FPSCounter,FPS Counter,显示FPS
 CstiCheatMode.TrashAll,All cards can be trashed,可丢弃任何卡牌
+CstiCheatMode.FastExploration,Fast exploration,快速探索
 CstiCheatMode.EncounterInvincible,Be invincible in all encounters,新版战斗无敌
 CstiCheatMode.Suns,Suns,太阳
 CstiCheatMode.Moons,Moons,月亮
