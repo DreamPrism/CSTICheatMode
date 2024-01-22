@@ -2,7 +2,7 @@
 
 This mod enables the cheat console and hotkeys in the game.
 
-More "Give" buttons and "Give & unlock" button (for blueprints) are added to the console.
+More features are added to it. Such as achievements hacking, fast exploration, and so on !
 
 An achievements hacker can be enabled in the config file.
 
