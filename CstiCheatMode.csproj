@@ -5,8 +5,8 @@
 		<RootNamespace>CstiCheatMode</RootNamespace>
 		<AssemblyName>CstiCheatMode</AssemblyName>
 		<Product>CSTI Cheat Mode Mod</Product>
-		<Version>0.0.7</Version>
-		<Description>Enable and localize the cheat console for CSTI</Description>
+		<Version>0.0.8</Version>
+		<Description>A better cheat console and QoL hotkeys for CSTI</Description>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<TargetFramework>net472</TargetFramework>
 		<LangVersion>latest</LangVersion>

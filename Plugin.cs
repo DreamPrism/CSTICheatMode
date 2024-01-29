@@ -16,19 +16,44 @@ public class Plugin : BaseUnityPlugin
     public static KeyCode ForceWinGameKey { get; private set; }
     public static KeyCode ForceLoseGameKey { get; private set; }
     public static KeyCode ShowFPSKey { get; private set; }
+    public static KeyCode FastDeleteCardKey { get; private set; }
+    public static KeyCode ScrollItemKey { get; private set; }
+    public static KeyCode MoveCardPileKey { get; private set; }
     public static bool HackAchievements { get; set; }
     public static bool CombatInvincible { get; set; }
-    public static bool FastExploration { get;set; }
+    public static bool FastExploration { get; set; }
+    public static float MoveCardPileDelay { get; set; }
+    public static int CardPileNoDelayMovingMaxSize { get; set; }
+
     private void Awake()
     {
-        Enabled = Config.Bind("General", nameof(Enabled), true, "If true, enable cheat mode.").Value;
+        Enabled = Config.Bind("Cheat-General", nameof(Enabled), true, "If true, enable cheat mode.").Value;
 
-        CallConsoleKey = Config.Bind("Hotkeys", nameof(CallConsoleKey), KeyCode.Tab, "The key to call cheat console").Value;
-        ForceWinGameKey = Config.Bind("Hotkeys", nameof(ForceWinGameKey), KeyCode.KeypadMultiply, "The key to force win a run").Value;
-        ForceLoseGameKey = Config.Bind("Hotkeys", nameof(ForceLoseGameKey), KeyCode.KeypadDivide, "The key to force lose a run").Value;
-        ShowFPSKey = Config.Bind("Hotkeys", nameof(ShowFPSKey), KeyCode.F, "The key to show FPS counter").Value;
+        CallConsoleKey = Config.Bind("Cheat-Hotkeys", nameof(CallConsoleKey), KeyCode.Tab,
+                "The key to call cheat console")
+            .Value;
+        ForceWinGameKey = Config.Bind("Cheat-Hotkeys", nameof(ForceWinGameKey), KeyCode.KeypadMultiply,
+            "The key to force win a run").Value;
+        ForceLoseGameKey = Config.Bind("Cheat-Hotkeys", nameof(ForceLoseGameKey), KeyCode.KeypadDivide,
+            "The key to force lose a run").Value;
+        ShowFPSKey = Config.Bind("Cheat-Hotkeys", nameof(ShowFPSKey), KeyCode.F, "The key to show FPS counter").Value;
+        FastDeleteCardKey = Config.Bind("Cheat-Hotkeys", nameof(FastDeleteCardKey), KeyCode.X,
+            "The key to press when fast deleting cards.").Value;
 
-        HackAchievements = Config.Bind("DangerousZone", nameof(HackAchievements), false, "If true (default false), complete all the achievements on game startup.\nThink twice before changing it to true.").Value;
+        MoveCardPileDelay = Config.Bind("QoL-Settings", nameof(MoveCardPileDelay), 0.005f,
+                "The delay between moving each card when moving card pile. Default 0.005s, set to 0 to disable delay.")
+            .Value;
+        CardPileNoDelayMovingMaxSize = Config.Bind("QoL-Settings", nameof(CardPileNoDelayMovingMaxSize), 10,
+                "The max size of card pile that can be moved without delay. Value too big can cause lag or crash.")
+            .Value;
+        ScrollItemKey = Config.Bind("QoL-HotKeys", nameof(ScrollItemKey), KeyCode.LeftAlt,
+            "The key to press when using mouse scroll to move cards.").Value;
+        MoveCardPileKey = Config.Bind("QoL-HotKeys", nameof(MoveCardPileKey), KeyCode.LeftShift,
+            "The key to press when moving card pile.").Value;
+
+        HackAchievements = Config.Bind("DangerousZone", nameof(HackAchievements), false,
+                "If true (default false), complete all the achievements on game startup.\nThink twice before changing it to true.")
+            .Value;
 
         if (HackAchievements)
         {
