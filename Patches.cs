@@ -16,6 +16,7 @@ public static class Patches
 {
     private static readonly Stack<InGameCardBase[]> GiveOperations = new();
     private static bool ScrollingCards;
+    private static bool UnlockingBlueprints;
     private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
 
     private static void ClearEmptyCardOperation()
@@ -42,7 +43,8 @@ public static class Patches
     [HarmonyPatch(typeof(CheatsManager), "CardsGUI")]
     public static bool PatchCardsGUI(CheatsManager __instance)
     {
-        if (!__instance.GM)
+        var gm = __instance.GM;
+        if (!gm)
         {
             return false;
         }
@@ -77,9 +79,34 @@ public static class Patches
                 var lastOperation = GiveOperations.Pop();
                 foreach (var card in lastOperation)
                 {
-                    if (!card || !__instance.GM.AllCards.Contains(card)) continue;
+                    if (!card || !gm.AllCards.Contains(card)) continue;
                     GameManager.PerformAction(card.CardModel.DefaultDiscardAction, card, true);
                 }
+            }
+        }
+
+        if (GUILayout.Button($"{new LocalizedString
+        {
+            LocalizationKey = "CstiCheatMode.UnlockAllBlueprints",
+            DefaultText = "Unlock all blueprints"
+        }}"))
+        {
+            foreach (var card in __instance.AllCards)
+            {
+                if (!card || card.CardType != CardTypes.Blueprint) continue;
+                UnlockingBlueprints = true;
+                
+                GameManager.GiveCard(card, false);
+                if (!gm.CheckedBlueprints.Contains(card))
+                    gm.CheckedBlueprints.Add(card);
+                if (!gm.BlueprintModelCards.Contains(card))
+                    gm.BlueprintModelCards.Add(card);
+
+                gm.BlueprintModelStates[card] = BlueprintModelState.Available;
+                if (gm.PurchasableBlueprintCards.Contains(card))
+                    gm.PurchasableBlueprintCards.Remove(card);
+                
+                UnlockingBlueprints = false;
             }
         }
 
@@ -138,9 +165,9 @@ public static class Patches
                             }))
                         {
                             GameManager.GiveCard(card, false);
-                            __instance.GM.BlueprintModelStates[card] = BlueprintModelState.Available;
-                            if (__instance.GM.PurchasableBlueprintCards.Contains(card))
-                                __instance.GM.PurchasableBlueprintCards.Remove(card);
+                            gm.BlueprintModelStates[card] = BlueprintModelState.Available;
+                            if (gm.PurchasableBlueprintCards.Contains(card))
+                                gm.PurchasableBlueprintCards.Remove(card);
                         }
                     }
                     else if (card.CardType == CardTypes.Item)
@@ -421,7 +448,7 @@ public static class Patches
             __instance.SwapCard();
             return false;
         }
-        
+
         if (CheatsManager.CanDeleteAllCards && Input.GetKey(Plugin.FastDeleteCardKey) &&
             _Pointer.button == PointerEventData.InputButton.Right && __instance &&
             __instance.CardModel && __instance.CardModel.DefaultDiscardAction != null)
@@ -429,7 +456,7 @@ public static class Patches
             GameManager.PerformAction(__instance.CardModel.DefaultDiscardAction, __instance, false);
             return false;
         }
-        
+
         return true;
     }
 
@@ -464,6 +491,13 @@ public static class Patches
     public static void PatchScrollRect(ScrollRect __instance, ref bool __runOriginal)
     {
         __runOriginal = !ScrollingCards;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GraphicsManager), "PlayBlueprintUnlocked")]
+    public static void PatchBlockNewBlueprintPopups(GraphicsManager __instance, ref bool __runOriginal)
+    {
+        __runOriginal = !UnlockingBlueprints;
     }
 
     [HarmonyPrefix]
