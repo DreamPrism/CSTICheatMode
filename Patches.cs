@@ -4,6 +4,7 @@ using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -95,7 +96,7 @@ public static class Patches
             {
                 if (!card || card.CardType != CardTypes.Blueprint) continue;
                 UnlockingBlueprints = true;
-                
+
                 GameManager.GiveCard(card, false);
                 if (!gm.CheckedBlueprints.Contains(card))
                     gm.CheckedBlueprints.Add(card);
@@ -105,7 +106,7 @@ public static class Patches
                 gm.BlueprintModelStates[card] = BlueprintModelState.Available;
                 if (gm.PurchasableBlueprintCards.Contains(card))
                     gm.PurchasableBlueprintCards.Remove(card);
-                
+
                 UnlockingBlueprints = false;
             }
         }
@@ -248,28 +249,35 @@ public static class Patches
     [HarmonyPatch(typeof(CheatsManager), "GeneralOptionsGUI")]
     public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
     {
+        // 可开关功能
         GUILayout.BeginVertical("box");
+        // FPS显示
         CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent(new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.FPSCounter",
             DefaultText = "FPS Counter"
         }));
+        // 可删除所有卡牌
         CheatsManager.CanDeleteAllCards = GUILayout.Toggle(CheatsManager.CanDeleteAllCards, new GUIContent(
             new LocalizedString
             {
                 LocalizationKey = "CstiCheatMode.TrashAll",
                 DefaultText = "All cards can be trashed"
             }));
+        // 快速探索
         Plugin.FastExploration = GUILayout.Toggle(Plugin.FastExploration, new GUIContent(new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.FastExploration",
             DefaultText = "Fast exploration"
         }));
+        // 战斗无敌
         Plugin.CombatInvincible = GUILayout.Toggle(Plugin.CombatInvincible, new GUIContent(new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.EncounterInvincible",
             DefaultText = "Be invincible in all encounters"
         }));
+
+        // 修改太阳和月亮数量
         GUILayout.BeginHorizontal();
         GUILayout.Label($"{new LocalizedString
         {
@@ -304,6 +312,46 @@ public static class Patches
         }
 
         GUILayout.EndHorizontal();
+
+        // 打开文件夹相关功能
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.OpenSaveFolder",
+                DefaultText = "Open save folder"
+            }))
+        {
+            Application.OpenURL(GameLoad.GameFilesDirectoryPath);
+        }
+
+        if (GUILayout.Button(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.OpenLogFolder",
+                DefaultText = "Open Player.log folder"
+            }))
+        {
+            Application.OpenURL(Path.Combine(Application.persistentDataPath));
+        }
+
+        GUILayout.EndHorizontal();
+        // 将存档和日志打包导出到桌面
+        if (__instance.GM && GUILayout.Button(new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.ExportDiagnosticInfos",
+                DefaultText = "Export diagnostic log infos to desktop"
+            }))
+        {
+            var desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            var savePath = Path.Combine(desktopPath, $"CSTI_{DateTime.Now:yyyy-MM-dd HH_mm_ss}");
+            var currentGameSave = GameLoad.Instance.Games[GameLoad.Instance.CurrentGameDataIndex].FileName;
+            var saveDataPath = Path.Combine(GameLoad.GameFilesDirectoryPath, currentGameSave);
+            var logPath = Path.Combine(Application.persistentDataPath, "Player.log");
+            Directory.CreateDirectory(savePath);
+            File.Copy(logPath, Path.Combine(savePath, "Player.log"));
+            File.Copy(saveDataPath, Path.Combine(savePath, currentGameSave));
+            Application.OpenURL(savePath);
+        }
+
         GUILayout.EndVertical();
         return false;
     }
