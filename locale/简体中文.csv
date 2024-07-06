@@ -21,3 +21,4 @@ CstiCheatMode.UnlockAllBlueprints,Unlock all blueprints,解锁所有蓝图
 CstiCheatMode.OpenSaveFolder,Open save folder,打开存档文件夹
 CstiCheatMode.OpenLogFolder,Open Player.log folder,打开Player.log所在文件夹
 CstiCheatMode.ExportDiagnosticInfos,Export diagnostic log infos to desktop,导出诊断信息到桌面
+CstiCheatMode.StepTicks,Step forward by ticks:,步进游戏刻:

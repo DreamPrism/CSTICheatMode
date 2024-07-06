@@ -18,6 +18,7 @@ public static class Patches
     private static readonly Stack<InGameCardBase[]> GiveOperations = new();
     private static bool ScrollingCards;
     private static bool UnlockingBlueprints;
+    private static int StepTimeTicks;
     private static readonly ManualLogSource PatchLogger = Logger.CreateLogSource("Cheat Mode Patches");
 
     private static void ClearEmptyCardOperation()
@@ -365,59 +366,47 @@ public static class Patches
             return false;
         }
 
+        // 时间管理UI标题
         GUILayout.BeginVertical("box");
         GUILayout.Label(new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.SetTimeTitle",
             DefaultText = "Set time to:"
         });
-        GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+
+        // 控制天数
+        GUILayout.BeginHorizontal();
         GUILayout.Label(new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.Days",
             DefaultText = "Days:"
         });
         GUILayout.FlexibleSpace();
-        if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
-        {
-            __instance.SetTimeDay--;
-        }
-
+        if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeDay--;
         GUILayout.Label(__instance.SetTimeDay.ToString(), GUILayout.Width(37.5f));
-        if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
-        {
-            __instance.SetTimeDay++;
-        }
-
+        if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeDay++;
         GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal(Array.Empty<GUILayoutOption>());
+
+        // 控制时刻
+        GUILayout.BeginHorizontal();
         GUILayout.Label($"{new LocalizedString
         {
             LocalizationKey = "CstiCheatMode.Ticks",
             DefaultText = "Tick"
         }} ({GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)}):");
         GUILayout.FlexibleSpace();
-        if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
-        {
-            __instance.SetTimeTick--;
-        }
-
+        if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeTick--;
         GUILayout.Label(__instance.SetTimeTick.ToString(), GUILayout.Width(37.5f));
-        if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0)
-        {
-            __instance.SetTimeTick++;
-        }
-
+        if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeTick++;
         GUILayout.EndHorizontal();
+
         if (__instance.GM)
         {
             __instance.SetTimeTick = Mathf.Clamp(__instance.SetTimeTick, 0, __instance.GM.DaySettings.DailyPoints);
             __instance.SetTimeDay = Mathf.Max(0, __instance.SetTimeDay);
+            StepTimeTicks = Math.Max(0, StepTimeTicks);
         }
-        else
-        {
-            GUILayout.Label("No GameManager found");
-        }
+        else GUILayout.Label("No GameManager found");
 
         if (GUILayout.Button(new LocalizedString
             {
@@ -426,6 +415,31 @@ public static class Patches
             }) && __instance.GM)
         {
             __instance.GM.SetTimeTo(__instance.SetTimeDay, __instance.SetTimeTick);
+        }
+
+        // 步进时间
+        GUILayout.BeginHorizontal();
+        GUILayout.Label(new LocalizedString
+        {
+            LocalizationKey = "CstiCheatMode.StepTicks",
+            DefaultText = "Step forward:"
+        });
+        GUILayout.FlexibleSpace();
+        if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) StepTimeTicks--;
+        GUILayout.Label(StepTimeTicks.ToString(), GUILayout.Width(37.5f));
+        if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) StepTimeTicks++;
+        GUILayout.EndHorizontal();
+        if (GUILayout.Button($"{new LocalizedString
+        {
+            LocalizationKey = "CstiCheatMode.StepTime",
+            DefaultText = "Go!"
+        }}") && __instance.GM)
+        {
+            var timeSkipAction = new CardAction(default, default, StepTimeTicks, null, null, null)
+            {
+                Cancellable = true
+            };
+            GameManager.PerformAction(timeSkipAction, null, true);
         }
 
         GUILayout.EndVertical();
