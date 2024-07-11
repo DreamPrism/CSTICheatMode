@@ -22,6 +22,8 @@ public class Plugin : BaseUnityPlugin
     public static bool HackAchievements { get; set; }
     public static bool CombatInvincible { get; set; }
     public static bool FastExploration { get; set; }
+    public static bool SkipTimeCostWheel { get; set; }
+    public static bool DisableBlueprintPopups { get; set; }
     public static float MoveCardPileDelay { get; set; }
     public static int CardPileNoDelayMovingMaxSize { get; set; }
 

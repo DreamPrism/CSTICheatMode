@@ -7,10 +7,12 @@ CstiCheatMode.Give10,Give 10,获取10次
 CstiCheatMode.Give20,Give 20,获取20次
 CstiCheatMode.Unlock,Unlock,解锁
 CstiCheatMode.Complete,Give and complete,获取并完成
-CstiCheatMode.FPSCounter,FPS Counter,显示FPS
-CstiCheatMode.TrashAll,All cards can be trashed,可丢弃任何卡牌
-CstiCheatMode.FastExploration,Fast exploration,快速探索
+CstiCheatMode.FPSCounter,FPS Counter,显示游戏帧率
+CstiCheatMode.TrashAll,All cards can be trashed,全卡牌可丢弃
+CstiCheatMode.FastExploration,Fast exploration,区域快速探索
 CstiCheatMode.EncounterInvincible,Be invincible in all encounters,新版战斗无敌
+CstiCheatMode.SkipTimeCostWheel,Skip all time cost wheels,取消时间读条
+CstiCheatMode.DisableBlueprintPopups,Disable blueprint popups,禁用蓝图弹窗
 CstiCheatMode.Suns,Suns,太阳
 CstiCheatMode.Moons,Moons,月亮
 CstiCheatMode.SetTimeTitle,Set time to:,设置时间为:
@@ -22,3 +24,4 @@ CstiCheatMode.OpenSaveFolder,Open save folder,打开存档文件夹
 CstiCheatMode.OpenLogFolder,Open Player.log folder,打开Player.log所在文件夹
 CstiCheatMode.ExportDiagnosticInfos,Export diagnostic log infos to desktop,导出诊断信息到桌面
 CstiCheatMode.StepTicks,Step forward by ticks:,步进游戏刻:
+CstiCheatMode.StepTimeMessage,Skipping time...,正在跳过时间...

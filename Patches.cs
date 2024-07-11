@@ -33,6 +33,31 @@ public static class Patches
         }
     }
 
+    private static IEnumerator SwapCardPileRoutine(IReadOnlyList<InGameCardBase> cards)
+    {
+        if (cards.Count == 0) yield break;
+        int num;
+        for (var i = 0; i < cards.Count; i = num + 1)
+        {
+            cards[i].SwapCard();
+            yield return new WaitForSeconds(Plugin.MoveCardPileDelay);
+            num = i;
+        }
+    }
+
+    private static void GiveCardsAndStack(CardData card, bool complete, int amount = 1)
+    {
+        var cards = new InGameCardBase[amount];
+        for (var i = 0; i < amount; i++)
+        {
+            GameManager.GiveCard(card, complete);
+            var gameCard = MBSingleton<GameManager>.Instance.FindLatestCreatedCard(card);
+            cards[i] = gameCard;
+        }
+
+        GiveOperations.Push(cards);
+    }
+
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CheatsManager), "CheatsActive", MethodType.Getter)]
     public static bool PatchCheatsActive(ref bool __result)
@@ -233,25 +258,15 @@ public static class Patches
         return false;
     }
 
-    private static void GiveCardsAndStack(CardData card, bool complete, int amount = 1)
-    {
-        var cards = new InGameCardBase[amount];
-        for (var i = 0; i < amount; i++)
-        {
-            GameManager.GiveCard(card, complete);
-            var gameCard = MBSingleton<GameManager>.Instance.FindLatestCreatedCard(card);
-            cards[i] = gameCard;
-        }
-
-        GiveOperations.Push(cards);
-    }
-
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CheatsManager), "GeneralOptionsGUI")]
     public static bool PatchGeneralOptionsGUI(CheatsManager __instance)
     {
         // 可开关功能
         GUILayout.BeginVertical("box");
+
+        GUILayout.BeginHorizontal();
+
         // FPS显示
         CheatsManager.ShowFPS = GUILayout.Toggle(CheatsManager.ShowFPS, new GUIContent(new LocalizedString
         {
@@ -265,6 +280,11 @@ public static class Patches
                 LocalizationKey = "CstiCheatMode.TrashAll",
                 DefaultText = "All cards can be trashed"
             }));
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+
         // 快速探索
         Plugin.FastExploration = GUILayout.Toggle(Plugin.FastExploration, new GUIContent(new LocalizedString
         {
@@ -277,6 +297,26 @@ public static class Patches
             LocalizationKey = "CstiCheatMode.EncounterInvincible",
             DefaultText = "Be invincible in all encounters"
         }));
+
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
+
+        // 跳过所有读条
+        Plugin.SkipTimeCostWheel = GUILayout.Toggle(Plugin.SkipTimeCostWheel, new GUIContent(new LocalizedString
+        {
+            LocalizationKey = "CstiCheatMode.SkipTimeCostWheel",
+            DefaultText = "Skip all time cost wheels"
+        }));
+        // 禁用蓝图弹窗
+        Plugin.DisableBlueprintPopups = GUILayout.Toggle(Plugin.DisableBlueprintPopups, new GUIContent(
+            new LocalizedString
+            {
+                LocalizationKey = "CstiCheatMode.DisableBlueprintPopups",
+                DefaultText = "Disable blueprint popups"
+            }));
+
+        GUILayout.EndVertical();
 
         // 修改太阳和月亮数量
         GUILayout.BeginHorizontal();
@@ -361,7 +401,8 @@ public static class Patches
     [HarmonyPatch(typeof(CheatsManager), "TimeGUI")]
     public static bool TimeGUI(CheatsManager __instance)
     {
-        if (!__instance.GM)
+        var gm = __instance.GM;
+        if (!gm)
         {
             return false;
         }
@@ -393,16 +434,16 @@ public static class Patches
         {
             LocalizationKey = "CstiCheatMode.Ticks",
             DefaultText = "Tick"
-        }} ({GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(__instance.GM.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)}):");
+        }} ({GameManager.TotalTicksToHourOfTheDayString(GameManager.HoursToTick(gm.DaySettings.DayStartingHour) + __instance.SetTimeTick, 0)}):");
         GUILayout.FlexibleSpace();
         if (GUILayout.RepeatButton("-", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeTick--;
         GUILayout.Label(__instance.SetTimeTick.ToString(), GUILayout.Width(37.5f));
         if (GUILayout.RepeatButton("+", GUILayout.Width(25f)) && Time.frameCount % 4 == 0) __instance.SetTimeTick++;
         GUILayout.EndHorizontal();
 
-        if (__instance.GM)
+        if (gm)
         {
-            __instance.SetTimeTick = Mathf.Clamp(__instance.SetTimeTick, 0, __instance.GM.DaySettings.DailyPoints);
+            __instance.SetTimeTick = Mathf.Clamp(__instance.SetTimeTick, 0, gm.DaySettings.DailyPoints);
             __instance.SetTimeDay = Mathf.Max(0, __instance.SetTimeDay);
             StepTimeTicks = Math.Max(0, StepTimeTicks);
         }
@@ -412,9 +453,9 @@ public static class Patches
             {
                 LocalizationKey = "CstiCheatMode.SetTime",
                 DefaultText = "Set time!"
-            }) && __instance.GM)
+            }) && gm)
         {
-            __instance.GM.SetTimeTo(__instance.SetTimeDay, __instance.SetTimeTick);
+            gm.SetTimeTo(__instance.SetTimeDay, __instance.SetTimeTick);
         }
 
         // 步进时间
@@ -433,17 +474,30 @@ public static class Patches
         {
             LocalizationKey = "CstiCheatMode.StepTime",
             DefaultText = "Go!"
-        }}") && __instance.GM)
+        }}") && gm)
         {
             var timeSkipAction = new CardAction(default, default, StepTimeTicks, null, null, null)
             {
-                Cancellable = true
+                Cancellable = true,
+                FadeMessage = new LocalizedString
+                {
+                    LocalizationKey = "CstiCheatMode.StepTimeMessage",
+                    DefaultText = "Skipping time..."
+                }
             };
             GameManager.PerformAction(timeSkipAction, null, true);
         }
 
         GUILayout.EndVertical();
         return false;
+    }
+
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(GameManager), "SpendDaytimePoints")]
+    public static void PatchSpendDaytimePoints(GameManager __instance, ref bool _HideWheel)
+    {
+        if (Plugin.SkipTimeCostWheel)
+            _HideWheel = true;
     }
 
     [HarmonyPrefix]
@@ -522,18 +576,6 @@ public static class Patches
         return true;
     }
 
-    private static IEnumerator SwapCardPileRoutine(IReadOnlyList<InGameCardBase> cards)
-    {
-        if (cards.Count == 0) yield break;
-        int num;
-        for (var i = 0; i < cards.Count; i = num + 1)
-        {
-            cards[i].SwapCard();
-            yield return new WaitForSeconds(Plugin.MoveCardPileDelay);
-            num = i;
-        }
-    }
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(GameManager), "Update")]
     public static void PatchGameUpdate(GameManager __instance)
@@ -550,17 +592,12 @@ public static class Patches
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ScrollRect), "OnScroll")]
-    public static void PatchScrollRect(ScrollRect __instance, ref bool __runOriginal)
-    {
-        __runOriginal = !ScrollingCards;
-    }
+    public static bool PatchScrollRect(ScrollRect __instance) => !ScrollingCards;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(GraphicsManager), "PlayBlueprintUnlocked")]
-    public static void PatchBlockNewBlueprintPopups(GraphicsManager __instance, ref bool __runOriginal)
-    {
-        __runOriginal = !UnlockingBlueprints;
-    }
+    public static bool PatchBlockNewBlueprintPopups(GraphicsManager __instance) =>
+        !UnlockingBlueprints && !Plugin.DisableBlueprintPopups;
 
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ExplorationBar), "ShouldUnlockExplorationResults")]
